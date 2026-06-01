@@ -1,8 +1,11 @@
 import os
 
+from dotenv import load_dotenv
 import google.generativeai as genai
 import streamlit as st
 
+
+load_dotenv()
 
 MODEL_NAME = "gemini-2.0-flash"
 SYSTEM_PROMPT = "You are a helpful personal assistant."

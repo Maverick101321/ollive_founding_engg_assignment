@@ -3,11 +3,14 @@ import os
 from pathlib import Path
 from typing import Optional
 
+from dotenv import load_dotenv
 import google.generativeai as genai
 from huggingface_hub import InferenceClient
 
 from prompts import EVAL_PROMPTS
 
+
+load_dotenv()
 
 SYSTEM_PROMPT = "You are a helpful personal assistant."
 QWEN_MODEL = "Qwen/Qwen2.5-0.5B-Instruct"

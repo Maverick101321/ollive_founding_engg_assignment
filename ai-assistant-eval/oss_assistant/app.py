@@ -1,8 +1,11 @@
 import os
 
+from dotenv import load_dotenv
 import streamlit as st
 from huggingface_hub import InferenceClient
 
+
+load_dotenv()
 
 MODEL_ID = "Qwen/Qwen2.5-0.5B-Instruct"
 SYSTEM_PROMPT = "You are a helpful personal assistant."
