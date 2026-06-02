@@ -1,13 +1,14 @@
 import os
+from pathlib import Path
 
 from dotenv import load_dotenv
 import google.generativeai as genai
 import streamlit as st
 
 
-load_dotenv()
+load_dotenv(Path(__file__).resolve().parents[2] / ".env")
 
-MODEL_NAME = "gemini-2.0-flash"
+MODEL_NAME = "gemini-2.5-flash-lite"
 SYSTEM_PROMPT = "You are a helpful personal assistant."
 
 

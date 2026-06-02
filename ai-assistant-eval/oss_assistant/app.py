@@ -1,13 +1,14 @@
 import os
+from pathlib import Path
 
 from dotenv import load_dotenv
 import streamlit as st
 from huggingface_hub import InferenceClient
 
 
-load_dotenv()
+load_dotenv(Path(__file__).resolve().parents[2] / ".env")
 
-MODEL_ID = "Qwen/Qwen2.5-0.5B-Instruct"
+MODEL_ID = "Qwen/Qwen2.5-7B-Instruct"
 SYSTEM_PROMPT = "You are a helpful personal assistant."
 
 

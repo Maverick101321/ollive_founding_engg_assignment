@@ -10,11 +10,11 @@ from huggingface_hub import InferenceClient
 from prompts import EVAL_PROMPTS
 
 
-load_dotenv()
+load_dotenv(Path(__file__).resolve().parents[2] / ".env")
 
 SYSTEM_PROMPT = "You are a helpful personal assistant."
-QWEN_MODEL = "Qwen/Qwen2.5-0.5B-Instruct"
-GEMINI_MODEL = "gemini-2.0-flash"
+QWEN_MODEL = "Qwen/Qwen2.5-7B-Instruct"
+GEMINI_MODEL = "gemini-2.5-flash-lite"
 OUTPUT_PATH = Path(__file__).with_name("results.json")
 
 

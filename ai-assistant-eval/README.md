@@ -2,8 +2,8 @@
 
 This project compares two personal-assistant chatbots:
 
-- `oss_assistant`: Streamlit chatbot using Hugging Face Inference API with `Qwen/Qwen2.5-0.5B-Instruct`.
-- `frontier_assistant`: Streamlit chatbot using Google Gemini API with `gemini-2.0-flash`.
+- `oss_assistant`: Streamlit chatbot using Hugging Face Inference API with `Qwen/Qwen2.5-7B-Instruct`.
+- `frontier_assistant`: Streamlit chatbot using Google Gemini API with `gemini-2.5-flash-lite`.
 
 Both assistants use the system prompt:
 
