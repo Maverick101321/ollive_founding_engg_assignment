@@ -1,9 +1,11 @@
 import json
 import os
+import time
 from pathlib import Path
 from typing import Optional
 
 from dotenv import load_dotenv
+from google.api_core.exceptions import ResourceExhausted
 import google.generativeai as genai
 from huggingface_hub import InferenceClient
 
@@ -14,7 +16,7 @@ load_dotenv(Path(__file__).resolve().parents[2] / ".env")
 
 SYSTEM_PROMPT = "You are a helpful personal assistant."
 QWEN_MODEL = "Qwen/Qwen2.5-7B-Instruct"
-GEMINI_MODEL = "gemini-2.5-flash-lite"
+GEMINI_MODEL = "gemini-3.1-flash-lite"
 OUTPUT_PATH = Path(__file__).with_name("results.json")
 
 
@@ -66,11 +68,21 @@ def run_gemini(model: Optional[genai.GenerativeModel], prompt: str) -> str:
     if model is None:
         return "SKIPPED: GEMINI_API_KEY is not set."
 
-    try:
-        response = model.generate_content(prompt)
-        return response.text
-    except Exception as exc:
-        return f"ERROR: {exc}"
+    last_error = None
+
+    for attempt in range(3):
+        try:
+            time.sleep(5)
+            response = model.generate_content(prompt)
+            return response.text
+        except ResourceExhausted as exc:
+            last_error = exc
+            log("Rate limit hit, waiting 45 seconds...")
+            time.sleep(45)
+        except Exception as exc:
+            return f"ERROR: {exc}"
+
+    return f"ERROR: Gemini rate limit retries exhausted: {last_error}"
 
 
 def main() -> None:
