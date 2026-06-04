@@ -1,4 +1,5 @@
 import os
+import re
 import time
 from pathlib import Path
 
@@ -27,6 +28,10 @@ def ensure_chat_state() -> None:
         st.session_state.total_output_tokens = 0
     if "total_cost" not in st.session_state:
         st.session_state.total_cost = 0.0
+    if "summary" not in st.session_state:
+        st.session_state.summary = ""
+    if "message_count" not in st.session_state:
+        st.session_state.message_count = 0
 
 def visible_messages() -> list[dict]:
     return [
@@ -42,6 +47,9 @@ st.sidebar.title("📊 Observability Metrics")
 st.sidebar.metric("Total Cost", f"${st.session_state.get('total_cost', 0):.6f}")
 st.sidebar.metric("Input Tokens", int(st.session_state.get('total_input_tokens', 0)))
 st.sidebar.metric("Output Tokens", int(st.session_state.get('total_output_tokens', 0)))
+
+if st.session_state.get("summary"):
+    st.sidebar.markdown("**Conversation Summary**\n" + st.session_state.summary)
 
 st.title("OSS Assistant")
 
@@ -66,12 +74,28 @@ if prompt := st.chat_input("Ask me anything"):
     
     # 2. Tool Use Check
     is_weather = "weather" in prompt_lower 
+    
+    # 3. Calculator Check
+    calc_match = re.search(r"(calculate|what is|compute)\s+([\d\s\+\-\*\/\(\)\.]+)", prompt_lower)
+    is_calc = bool(calc_match)
 
     with st.chat_message("assistant"):
         start = time.time()
         
         if is_blocked:
             assistant_message = "I'm not able to help with that."
+        elif is_calc:
+            with st.status("Calculating..."):
+                time.sleep(0.5)
+            expression = calc_match.group(2)
+            if re.match(r'^[\d\s\+\-\*\/\(\)\.]+$', expression):
+                try:
+                    result = eval(expression, {"__builtins__": None}, {})
+                    assistant_message = f"The answer is {result}"
+                except Exception as e:
+                    assistant_message = f"Error evaluating expression: {e}"
+            else:
+                assistant_message = "Invalid characters in expression."
         elif is_weather:
             with st.status("Calling Weather API Tool..."):
                 time.sleep(1) # Mock API delay
@@ -109,6 +133,22 @@ if prompt := st.chat_input("Ask me anything"):
     st.session_state.messages.append(
         {"role": "assistant", "content": assistant_message, "latency": latency}
     )
+    
+    st.session_state.message_count += 1
+    
+    if st.session_state.message_count % 6 == 0:
+        with st.spinner("Summarizing conversation..."):
+            vis_msgs = visible_messages()
+            last_6_messages = "\n".join([f"{m['role']}: {m['content']}" for m in vis_msgs[-6:]])
+            summary_prompt = f"Summarize this conversation in 2-3 bullet points: {last_6_messages}"
+            try:
+                summary_resp = get_client().chat_completion(
+                    messages=[{"role": "user", "content": summary_prompt}],
+                    max_tokens=256,
+                )
+                st.session_state.summary = summary_resp.choices[0].message.content
+            except Exception as e:
+                pass
     
     # Refresh to update the sidebar metrics immediately
     st.rerun()
