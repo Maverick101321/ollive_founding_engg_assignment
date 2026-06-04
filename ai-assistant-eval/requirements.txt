@@ -2,3 +2,6 @@ streamlit
 huggingface_hub
 google-generativeai
 python-dotenv
+openai
+matplotlib
+numpy
